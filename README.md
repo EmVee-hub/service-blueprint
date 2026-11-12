@@ -7,7 +7,7 @@ sample Dockerfile and add the application's real source code and tests.
 
 1. Use the shared `EmVee-hub/github-actions` PoC security action.
 2. `.github/workflows/ci.yml` uses the reviewed immutable action commit
-   `cfbfd7767029560ecc790112965db74b78ac5464`. Update this pin
+   `1183ca0651c01dfa3ef199b722437628c0cdd721`. Update this pin
    intentionally after compatibility tests, not automatically.
 3. Permit access to the shared action from this repository if the central repo is private.
 4. Choose `exposure`: `public`, `internal` or `unknown`. Missing/unknown is treated as public.
@@ -79,3 +79,10 @@ The image-scan and VEX/SSVC demonstrations are a **technical PoC**.
 The shared AKS/EKS runtime join is validated with **synthetic evidence**, not
 live-cluster coverage. Production cloud validation, trusted VEX and disposition
 tracking are future operational MVP work.
+
+## Report revision
+
+New runs use the BOD-first policy and a compact findings table. Historical
+GitHub Actions reruns preserve their original commit and action pin; they can
+still show removed `POC_*` probability-policy rules. To validate the current
+policy, choose **Run workflow** on `main` instead of **Re-run jobs** on an old run.

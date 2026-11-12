@@ -45,7 +45,7 @@ jobs:
       # Reviewed BOD 26-04 + post-BOD EPSS quartile policy action SHA.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@cfbfd7767029560ecc790112965db74b78ac5464
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@1183ca0651c01dfa3ef199b722437628c0cdd721
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json

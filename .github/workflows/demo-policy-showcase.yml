@@ -62,7 +62,7 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@cfbfd7767029560ecc790112965db74b78ac5464
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@1183ca0651c01dfa3ef199b722437628c0cdd721
         with:
           image: ${{ env.DEMO_IMAGE }}
           vex-path: vex/openvex.json
@@ -75,7 +75,7 @@ jobs:
       # The composite action defaults missing exposure to unknown -> PE=Y.
       - name: Rescan cae-live WITHOUT the exposure input
         if: matrix.case == 'cae-live-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@cfbfd7767029560ecc790112965db74b78ac5464
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@1183ca0651c01dfa3ef199b722437628c0cdd721
         with:
           image: ${{ env.DEMO_IMAGE }}
           vex-path: vex/openvex.json
@@ -113,7 +113,7 @@ jobs:
 
       - name: Evaluate the SAME image with scoped demonstration VEX
         if: matrix.case == 'log4shell-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@cfbfd7767029560ecc790112965db74b78ac5464
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@1183ca0651c01dfa3ef199b722437628c0cdd721
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: demo-images/generated-vex.json
