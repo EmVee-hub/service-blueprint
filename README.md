@@ -39,10 +39,21 @@ The workflow intentionally stays in `shadow` mode until the actual GitHub
 runner and CVE Services lookup have been smoke-tested. Security reports are
 uploaded as Actions artifacts; the sample Dockerfile is not production code.
 
-## Azure Defender / AWS Inspector test showcase
+## Running container security — Azure AKS and AWS EKS/ECS
 
-[Cloud findings and VEX showcase](demo-cloud/README.md) runs both shared cloud
-collectors on synthetic fixtures and displays found CVEs, severity, provider
-status, and VEX before/after evidence in Actions annotations and a combined
-summary. It proves exact-match suppression and mismatch safeguards offline;
-production cloud policy enforcement remains pending.
+Our security scope is **running containers only**: AKS/EKS Pod containers and
+ECS task containers, including their image packages and CVEs.
+
+The active end-to-end cloud correlation showcase now lives in the central
+[container runtime policy CI](https://github.com/EmVee-hub/github-actions/blob/feat/runtime-correlation-policy/.github/workflows/runtime-demo.yml).
+It joins Inspector/Defender evidence to confirmed RUNNING containers using
+immutable image digests and evaluates CISA BOD 26-04 + EPSS and project OpenVEX.
+Unmatched/non-running registry images, Azure VM/EC2 hosts and node OS findings
+are **not active runtime vulnerabilities**.
+
+The older service-level `demo-cloud` suite only demonstrated standalone,
+synthetic registry finding/VEX parsing without a runtime join. It is removed
+from this scaffold to prevent it being confused with the running-container
+pipeline. See the [central runtime pilot documentation](https://github.com/EmVee-hub/github-actions/blob/feat/runtime-correlation-policy/docs/runtime-mvp.md).
+
+The application CI Grype and OpenVEX showcase remains in this repository.
