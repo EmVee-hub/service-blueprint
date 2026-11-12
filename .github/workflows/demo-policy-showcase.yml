@@ -12,7 +12,20 @@ permissions:
   contents: read
 
 jobs:
+  legend:
+    name: Legend — How to read this report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout report legend
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Publish legend once to GitHub Actions summary
+        shell: bash
+        run: cat security/report-legend.md >> "$GITHUB_STEP_SUMMARY"
+
   scan:
+    needs: [legend]
     name: "Scan: ${{ matrix.case }}"
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -27,15 +40,25 @@ jobs:
           - {case: library-mix-internal, context: demo-images/library-mix, exposure: internal}
           - {case: legacy-alpine-internal, context: demo-images/legacy-alpine, exposure: internal}
           - {case: minimal-scratch-internal, context: demo-images/minimal-scratch, exposure: internal}
+          - {case: cae-live-public, context: demo-images/cae-live, exposure: public}
 
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
+      - name: Choose local image tag
+        shell: bash
+        run: |
+          if [[ "${{ matrix.case }}" == "cae-live-public" ]]; then
+            echo "DEMO_IMAGE=cae-live:ci-${{ github.sha }}" >> "$GITHUB_ENV"
+          else
+            echo "DEMO_IMAGE=policy-showcase:${{ matrix.case }}-${{ github.sha }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Build demo image locally (do not push or run)
         shell: bash
         run: |
-          docker build --pull --tag "policy-showcase:${{ matrix.case }}-${{ github.sha }}" "${{ matrix.context }}"
+          docker build --pull --tag "$DEMO_IMAGE" "${{ matrix.context }}"
 
       - name: Install Grype
         id: grype
@@ -43,15 +66,44 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@d9755233a90b93aec872719323db289d2651af77
         with:
-          image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
+          image: ${{ env.DEMO_IMAGE }}
           vex-path: vex/openvex.json
           exposure: ${{ matrix.exposure }}
           grype-binary: ${{ steps.grype.outputs.cmd }}
           mode: shadow
           report-directory: security-reports/${{ matrix.case }}
 
+      # This is the SAME local image, re-scanned without passing `exposure` at all.
+      # The composite action defaults missing exposure to unknown -> PE=Y.
+      - name: Rescan cae-live WITHOUT the exposure input
+        if: matrix.case == 'cae-live-public'
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@d9755233a90b93aec872719323db289d2651af77
+        with:
+          image: ${{ env.DEMO_IMAGE }}
+          vex-path: vex/openvex.json
+          grype-binary: ${{ steps.grype.outputs.cmd }}
+          mode: shadow
+          report-directory: security-reports/cae-live-no-exposure
+
+      - name: Verify cae-live explicit vs omitted exposure
+        if: matrix.case == 'cae-live-public'
+        shell: bash
+        run: |
+          python3 demo-images/exposure_proof.py \
+            --explicit security-reports/cae-live-public/decision.json \
+            --omitted security-reports/cae-live-no-exposure/decision.json \
+            --output security-reports/cae-live-no-exposure/exposure-proof.json
+
+      - name: Upload omitted-exposure scan evidence
+        if: always() && matrix.case == 'cae-live-public'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: showcase-cae-live-no-exposure
+          path: security-reports/cae-live-no-exposure/
+          if-no-files-found: error
+          retention-days: 7
       # A real Grype/OpenVEX proof for one image. The statement is created
       # exclusively for this inert educational image, never for a service.
       - name: Create scoped demonstration VEX from the baseline Log4Shell match
@@ -65,7 +117,7 @@ jobs:
 
       - name: Evaluate the SAME image with scoped demonstration VEX
         if: matrix.case == 'log4shell-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@d9755233a90b93aec872719323db289d2651af77
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: demo-images/generated-vex.json
