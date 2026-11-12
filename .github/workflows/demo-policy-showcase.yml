@@ -106,7 +106,7 @@ jobs:
           retention-days: 7
       # A real Grype/OpenVEX proof for one image. The statement is created
       # exclusively for this inert educational image, never for a service.
-      - name: Create scoped demonstration VEX from the baseline Log4Shell match
+      - name: Create scoped demonstration VEX for all inert Log4j findings
         if: matrix.case == 'log4shell-public'
         shell: bash
         run: |
@@ -126,7 +126,7 @@ jobs:
           mode: shadow
           report-directory: security-reports/vex-proof
 
-      - name: Assert VEX suppressed only the intended CVE and package
+      - name: Assert scoped VEX suppressions and ALLOW admission
         if: matrix.case == 'log4shell-public'
         shell: bash
         run: |
@@ -134,7 +134,8 @@ jobs:
             --baseline security-reports/log4shell-public/grype.json \
             --with-vex security-reports/vex-proof/grype.json \
             --vex demo-images/generated-vex.json \
-            --proof security-reports/vex-proof/proof.json
+            --proof security-reports/vex-proof/proof.json \
+            --decision security-reports/vex-proof/decision.json
           cp demo-images/generated-vex.json security-reports/vex-proof/generated-vex.json
 
       - name: Upload explicit VEX before-and-after evidence
@@ -189,3 +190,4 @@ jobs:
           name: showcase-comparison
           path: showcase-summary.md
           retention-days: 7
+

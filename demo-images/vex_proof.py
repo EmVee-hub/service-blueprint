@@ -23,29 +23,26 @@ def key(match: dict) -> tuple[str, str]:
     )
 
 
-def target_match(data: dict) -> dict:
-    matches = [
-        match for match in data.get("matches", [])
-        if (match.get("vulnerability") or {}).get("id") == TARGET_CVE
-        and (match.get("artifact") or {}).get("name") == TARGET_PACKAGE
-        and (match.get("artifact") or {}).get("version") == TARGET_VERSION
-        and (match.get("artifact") or {}).get("purl")
-    ]
-    if len(matches) != 1:
-        raise ValueError(
-            f"Expected exactly one {TARGET_CVE} / {TARGET_PACKAGE}@{TARGET_VERSION} "
-            f"baseline finding with PURL, found {len(matches)}"
-        )
-    return matches[0]
+def target_matches(data: dict) -> list[dict]:
+    """All advisories on the inert, exact Log4j core fixture component."""
+    expected_purl = f"pkg:maven/org.apache.logging.log4j/{TARGET_PACKAGE}@{TARGET_VERSION}"
+    matches = [m for m in data.get("matches", [])
+               if (m.get("artifact") or {}).get("name") == TARGET_PACKAGE
+               and (m.get("artifact") or {}).get("version") == TARGET_VERSION
+               and (m.get("artifact") or {}).get("purl", "").split("?")[0] == expected_purl
+               and key(m)[0]]
+    ids = {key(m)[0] for m in matches}
+    aliases = {v.get("id") for m in matches for v in m.get("relatedVulnerabilities", [])}
+    if TARGET_CVE not in ids | aliases:
+        raise ValueError("Expected the Log4Shell baseline finding (primary ID or CVE alias)")
+    return list({key(m): m for m in matches}.values())
 
 
 def create(baseline: Path, image: str, output: Path) -> None:
     if not image.startswith("policy-showcase:log4shell-public-"):
         raise ValueError("Only the Log4Shell non-serving demonstration image is supported")
     data = json.loads(baseline.read_text())
-    found = target_match(data)
-    purl = found["artifact"]["purl"]
-    sub = {"@id": purl, "identifiers": {"purl": purl}}
+    found = target_matches(data)
     # The same image may be matched by its tag or its OCI PURL depending on
     # the Grype/Syft versions. Always scope BOTH to the exact package PURL.
     doc = {
@@ -55,12 +52,12 @@ def create(baseline: Path, image: str, output: Path) -> None:
         "version": 1,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "statements": [{
-            "vulnerability": {"name": TARGET_CVE},
+            "vulnerability": {"name": key(match)[0]},
             "products": [
-                {"@id": image, "subcomponents": [sub]},
+                {"@id": image, "subcomponents": [{"@id": key(match)[1], "identifiers": {"purl": key(match)[1]}}]},
                 {"@id": "pkg:oci/policy-showcase",
                  "identifiers": {"purl": "pkg:oci/policy-showcase"},
-                 "subcomponents": [sub]},
+                 "subcomponents": [{"@id": key(match)[1], "identifiers": {"purl": key(match)[1]}}]},
             ],
             "status": "not_affected",
             "justification": "vulnerable_code_not_in_execute_path",
@@ -69,57 +66,59 @@ def create(baseline: Path, image: str, output: Path) -> None:
                 "as inert scan data, but no JVM or Java application executes "
                 "them. This assessment does NOT apply to deployed applications."
             ),
-        }]
+        } for match in found]
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(doc, indent=2) + "\n")
-    print(f"Created demo-only OpenVEX for {TARGET_CVE}, package {purl}")
+    print(f"Created demo-only OpenVEX for {len(found)} exact Log4j advisory/package pairs")
 
 
-def check(baseline: Path, with_vex: Path, vex: Path, proof: Path) -> None:
+def check(baseline: Path, with_vex: Path, vex: Path, proof: Path, decision: Path) -> None:
     before = json.loads(baseline.read_text())
     after = json.loads(with_vex.read_text())
     doc = json.loads(vex.read_text())
-    expected = key(target_match(before))
-
-    if len(doc.get("statements", [])) != 1:
-        raise ValueError("Expected a single, constrained demonstration VEX statement")
-    if doc["statements"][0]["vulnerability"]["name"] != TARGET_CVE:
-        raise ValueError("Wrong VEX vulnerability")
+    expected = {key(m) for m in target_matches(before)}
+    statements = doc.get("statements", [])
+    actual = {(s["vulnerability"]["name"], p["@id"])
+              for s in statements for product in s["products"]
+              for p in product.get("subcomponents", [])}
+    if actual != expected or len(statements) != len(expected):
+        raise ValueError("VEX must cover exactly the inert Log4j advisory/package pairs")
+    if any(s.get("status") != "not_affected" or
+           s.get("justification") != "vulnerable_code_not_in_execute_path" for s in statements):
+        raise ValueError("Unexpected VEX assessment")
     active_before = {key(x) for x in before.get("matches", [])}
     active_after = {key(x) for x in after.get("matches", [])}
-    if expected not in active_before or expected in active_after:
-        raise ValueError("VEX did not move the intended vulnerability out of active matches")
-
-    # All other findings must remain active; VEX must not broadly waive Log4j.
-    if active_before - {expected} != active_after:
-        raise ValueError("VEX changed findings beyond the one scoped advisory/package")
-
-    ignored = [item for item in after.get("ignoredMatches", []) if key(item) == expected]
-    if len(ignored) != 1:
-        raise ValueError("The intended finding was not recorded in ignoredMatches")
-    rules = ignored[0].get("appliedIgnoreRules") or []
-    if not any(
-        str(rule.get("namespace", "")).lower() == "vex"
-        or "vex" in str(rule.get("reason", "")).lower()
-        or rule.get("vexStatus") == "not_affected"
-        for rule in rules if isinstance(rule, dict)
-    ):
-        raise ValueError("Grype ignored the finding but did not provide VEX rule evidence")
+    if active_before - expected != active_after:
+        raise ValueError("VEX failed to suppress all intended findings or changed unrelated findings")
+    for target in expected:
+        ignored = [m for m in after.get("ignoredMatches", []) if key(m) == target]
+        if not ignored or not all(any(
+            str(rule.get("namespace", "")).lower() == "vex"
+            or "vex" in str(rule.get("reason", "")).lower()
+            or rule.get("vexStatus") == "not_affected"
+            for rule in m.get("appliedIgnoreRules", []) if isinstance(rule, dict)
+        ) for m in ignored):
+            raise ValueError(f"Missing ignoredMatches VEX evidence for {target}")
+    admission = json.loads(decision.read_text()).get("admission")
+    if admission != "ALLOW":
+        raise ValueError(f"Expected ALLOW after demo VEX, got {admission!r}")
     result = {
         "verified": True,
-        "vulnerability_id": expected[0],
+        "vulnerability_id": ", ".join(sorted({k[0] for k in expected})),
+        "vulnerability_ids": sorted({k[0] for k in expected}),
+        "admission": admission,
         "package": TARGET_PACKAGE + "@" + TARGET_VERSION,
-        "package_purl": expected[1],
+        "package_purls": sorted({k[1] for k in expected}),
         "active_before": len(before.get("matches", [])),
         "active_after": len(after.get("matches", [])),
-        "suppressed_count": 1,
+        "suppressed_count": len(expected),
         "reason": "vulnerable_code_not_in_execute_path",
         "scope": "non-serving local training image only",
     }
     proof.parent.mkdir(parents=True, exist_ok=True)
     proof.write_text(json.dumps(result, indent=2) + "\n")
-    print(f"VEX VERIFIED: {expected[0]} {expected[1]} suppressed; all others remain active")
+    print(f"VEX VERIFIED: {len(expected)} scoped findings suppressed; admission ALLOW; unrelated findings remain active")
 
 
 def main() -> None:
@@ -130,16 +129,18 @@ def main() -> None:
     parser.add_argument("--with-vex", type=Path)
     parser.add_argument("--vex", required=True, type=Path)
     parser.add_argument("--proof", type=Path)
+    parser.add_argument("--decision", type=Path)
     args = parser.parse_args()
     if args.command == "create":
         if not args.image:
             parser.error("create requires --image")
         create(args.baseline, args.image, args.vex)
     else:
-        if not args.with_vex or not args.proof:
-            parser.error("check requires --with-vex and --proof")
-        check(args.baseline, args.with_vex, args.vex, args.proof)
+        if not args.with_vex or not args.proof or not args.decision:
+            parser.error("check requires --with-vex, --proof and --decision")
+        check(args.baseline, args.with_vex, args.vex, args.proof, args.decision)
 
 
 if __name__ == "__main__":
     main()
+

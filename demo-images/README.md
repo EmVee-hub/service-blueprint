@@ -84,19 +84,22 @@ the **log4shell-public** case runs a second scan of the **same local image**
 with a generated, tightly scoped OpenVEX document:
 
 1. First scan: Grype finds Log4Shell without any suppression.
-2. `vex_proof.py create` selects **only** the exact
-   `CVE-2021-44228` / `log4j-core:2.14.1` finding, records Grype's
-   primary ID and package PURL, and creates a VEX statement with product
-   context. The documented justification is
-   `vulnerable_code_not_in_execute_path` because this **inert training image**
-   contains JARs as data but has **no Java runtime or application** that can
-   invoke the vulnerable code.
-3. Second scan: the shared action applies the generated VEX.
-4. The test **fails** unless the exact finding moves from Grype
-   `matches` into `ignoredMatches` with VEX evidence; it also verifies
-   unrelated findings remain active.
-5. Both reports, the VEX document, and `proof.json` are uploaded; the
-   combined comparison reports the active before/after counts.
+2. `vex_proof.py create` creates one statement for **every detected advisory**
+   on the exact `log4j-core:2.14.1` Maven PURL, including scanner-primary IDs
+   such as GHSA IDs. Log4Shell must be present as a primary ID or CVE alias.
+   Each statement uses `vulnerable_code_not_in_execute_path`: the final
+   training image contains inert JARs, with no JVM or Java application.
+3. Second scan: the shared action applies this generated demo VEX.
+4. The test **fails** unless every targeted finding moves into `ignoredMatches`
+   with VEX evidence, all unrelated findings remain active, and the second
+   policy decision is **ALLOW**. Missing/incomplete decisions cannot pass.
+5. Both reports, the generated VEX and `proof.json` are uploaded. The baseline
+   `log4shell-public` remains visible for comparison; `vex-proof` is its passing
+   after-VEX result, including all suppressed advisory IDs and counts.
+
+This covers all Log4j findings in the fixture, rather than only CVE-2021-44228.
+OS packages and other components are not covered by the no-JVM justification;
+if they block admission, the proof fails for investigation instead of hiding them.
 
 **Critical:** this is a controlled educational fixture, not an automated
 vulnerability disposition. Never copy this `not_affected` assertion to a
@@ -116,3 +119,4 @@ fixed-output test suite.
 - Log4Shell: https://nvd.nist.gov/vuln/detail/CVE-2021-44228
 - React2Shell: https://react.dev/blog/2025/12/03/critical-security-vulnerability-in-react-server-components
 - CISA BOD 26-04 table: https://github.com/CERTCC/SSVC/blob/main/data/json/decision_tables/cisa/cisa_bod_26_04_1_0_0.json
+
