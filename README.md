@@ -45,7 +45,7 @@ Our security scope is **running AKS/EKS Pod containers only**, alongside pre-dep
 CI/CD image scanning, including image packages and CVEs.
 
 The synthetic runtime correlation demonstration lives in the central
-[manual PoC showcase](https://github.com/EmVee-hub/github-actions/blob/refactor/poc-workflows-and-docs/.github/workflows/poc-showcase.yml) (select `runtime` or `all`).
+[manual PoC showcase](https://github.com/EmVee-hub/github-actions/blob/main/.github/workflows/poc-showcase.yml) (select `runtime` or `all`).
 It joins Inspector/Defender evidence to confirmed RUNNING containers using
 immutable image digests and evaluates CISA BOD 26-04 + EPSS and project OpenVEX.
 Unmatched/non-running registry images, Azure VM/EC2 hosts and node OS findings
@@ -54,7 +54,7 @@ are **not active runtime vulnerabilities**.
 The older service-level `demo-cloud` suite only demonstrated standalone,
 synthetic registry finding/VEX parsing without a runtime join. It is removed
 from this scaffold to prevent it being confused with the running-container
-pipeline. See the [central PoC architecture and limitations](https://github.com/EmVee-hub/github-actions/blob/refactor/poc-workflows-and-docs/docs/runtime-poc.md).
+pipeline. See the [central PoC architecture and limitations](https://github.com/EmVee-hub/github-actions/blob/main/docs/runtime-poc.md).
 
 The normal application CI (`.github/workflows/ci.yml`) builds and scans the
 candidate image and now also runs the lightweight vulnerability showcase unit

@@ -6,7 +6,7 @@ The workflow builds them locally on GitHub-hosted runners, never runs a containe
 or exposes a network port, never logs into a registry, and never pushes anything.
 
 The complete vulnerability showcase runs **manually only** via
-**Actions → Vulnerability policy showcase → Run workflow**. It no longer
+**Actions → Container vulnerability PoC showcase → Run workflow**. It no longer
 runs the eight-image matrix on ordinary pull requests. The lightweight
 offline tests for the report, VEX and exposure proof helpers run in the normal
 `.github/workflows/ci.yml` on every PR/push instead.
