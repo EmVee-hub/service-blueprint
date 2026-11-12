@@ -71,7 +71,8 @@ def report(root):
         scan_sections.append("")
     lines += ["", "## 3. Individual scan sections", ""] + scan_sections
 
-    proof_file = root / "showcase-vex-proof" / "proof.json"
+    proof_candidates = sorted((root / "showcase-vex-proof").rglob("proof.json"))
+    proof_file = proof_candidates[0] if proof_candidates else (root / "showcase-vex-proof" / "proof.json")
     lines += ["", "## 4. OpenVEX: before vs. after", ""]
     if proof_file.is_file():
         try:

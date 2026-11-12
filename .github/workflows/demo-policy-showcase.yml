@@ -118,6 +118,9 @@ jobs:
         with:
           pattern: showcase-*
           path: showcase-results
+      - name: Test report and VEX proof helpers
+        run: python3 -m unittest discover -s demo-images -p 'test_*.py' -v
+
       - name: Generate comparison
         shell: bash
         run: |
@@ -126,7 +129,7 @@ jobs:
       - name: Verify VEX proof was produced
         shell: bash
         run: |
-          test -f showcase-results/showcase-vex-proof/proof.json
+          find showcase-results/showcase-vex-proof -name proof.json -type f -print | grep -q 'proof.json'
 
       - name: Upload comparison
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
