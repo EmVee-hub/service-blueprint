@@ -61,11 +61,7 @@ def create(baseline: Path, image: str, output: Path) -> None:
             ],
             "status": "not_affected",
             "justification": "vulnerable_code_not_in_execute_path",
-            "impact_statement": (
-                "TRAINING FIXTURE ONLY: final image contains Log4j JAR files "
-                "as inert scan data, but no JVM or Java application executes "
-                "them. This assessment does NOT apply to deployed applications."
-            ),
+            "impact_statement": "Not in use by application - Showcase",
         } for match in found]
     }
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -143,4 +139,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
