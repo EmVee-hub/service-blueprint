@@ -7,7 +7,7 @@ sample Dockerfile and add the application's real source code and tests.
 
 1. Use the shared `EmVee-hub/github-actions` PoC security action.
 2. `.github/workflows/ci.yml` uses the reviewed immutable action commit
-   `d9755233a90b93aec872719323db289d2651af77`. Update this pin
+   `cfbfd7767029560ecc790112965db74b78ac5464`. Update this pin
    intentionally after compatibility tests, not automatically.
 3. Permit access to the shared action from this repository if the central repo is private.
 4. Choose `exposure`: `public`, `internal` or `unknown`. Missing/unknown is treated as public.
@@ -26,6 +26,18 @@ sample Dockerfile and add the application's real source code and tests.
 - Full OpenVEX signature or schema validation.
 
 The CI action must run **after image build and before any production promotion**.
+
+## Authoritative vulnerability decision model
+
+The shared action evaluates CISA BOD 26-04 using KEV, exposure, SSVC
+Automatable and Technical Impact, then applies the versioned *local* EPSS
+percentile-quartile table from `github-actions/policy/epss-amplifier.json`.
+KEV and base `3D`/`3DF` decisions cannot be downgraded; EPSS never
+creates a new `3DF` investigation. Missing EPSS uses neutral Q2.
+`3D`/`3DF` → BLOCK, incomplete assessment → REVIEW_REQUIRED;
+`FSU`/`60D`/`14D` → ALLOW. The removed EPSS probability shortcut
+is no longer an active policy option. This scaffold still runs in shadow
+mode and does not promote images.
 
 ## CISA Vulnrichment lookup
 
