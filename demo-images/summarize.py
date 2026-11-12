@@ -115,7 +115,7 @@ def report(root):
     proof_file = proof_candidates[0] if proof_candidates else (root / "showcase-vex-proof" / "proof.json")
     lines += ["", "## 3. OpenVEX: before vs. after", "",
               "**Goal of test:** Demonstrate scoped VEX suppression on the same image.", "",
-              "**Expected behavior:** The targeted finding moves to ignoredMatches with VEX evidence; unrelated findings remain active.", ""]
+              "**Expected behavior:** All scoped Log4j findings move to ignoredMatches with VEX evidence; unrelated components remain active and after-VEX admission is ALLOW.", ""]
     if proof_file.is_file():
         try:
             proof = json.loads(proof_file.read_text(encoding="utf-8"))
@@ -128,7 +128,8 @@ def report(root):
                 f"- Active findings before VEX: **{proof['active_before']}**.",
                 f"- Active findings after VEX: **{proof['active_after']}**.",
                 f"- VEX-suppressed matching finding(s): **{proof['suppressed_count']}**.",
-                f"- Remaining active findings are still evaluated; VEX did not waive other CVEs.",
+                f"- After-VEX admission: **{proof.get('admission', 'UNKNOWN')}**.",
+                "- Unrelated components remain active and are still evaluated.",
                 "",
             ]
         else:
