@@ -43,16 +43,5 @@ show the actual Grype findings and policy decisions without repeating these defi
 | REVIEW_REQUIRED | Incomplete inputs with no evaluated 3D/3DF already causing BLOCK. |
 | VEX ignored | Finding moved to Grype `ignoredMatches` due to matching OpenVEX; retained as evidence. |
 
-## Showcase comparison columns
-
-| Column | Meaning |
-|---|---|
-| Example / Exposure | Demo image and simulated public/internal exposure. |
-| Findings / C-H-M-L | Active findings and Grype severity distribution. |
-| FSU / 60D / 14D / 3D / 3DF | Finding counts by **final** policy outcome. |
-| Incomplete | Findings requiring policy review. |
-| VEX ignored | Applicability-suppressed findings, not deleted. |
-| Admission | ALLOW, BLOCK or REVIEW_REQUIRED from the shared evaluator. |
-
 **Source vs rule:** Grype discovers findings, CISA can provide SSVC values,
 and our decision rule explains prioritisation. EPSS amplification is **local policy**, not CISA's table.
