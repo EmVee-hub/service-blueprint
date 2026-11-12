@@ -53,6 +53,17 @@ class CloudVexTests(unittest.TestCase):
         del self.vex['statements'][0]['products'][0]['subcomponents']
         self.assertEqual(self.result(), 'ACTIVE')
 
+    def test_report_marks_unexpected_disposition_failed(self):
+        row = {'case': 'log4shell-scoped', 'cve': 'CVE-2021-44228',
+               'severity': 'Critical', 'provider_status': 'ACTIVE',
+               'before_vex': 'ACTIVE', 'after_vex': 'ACTIVE',
+               'vex_status': 'NO_MATCH', 'reason': 'No match', 'policy': 'NOT_EVALUATED'}
+        md = s.report({'azure': [row]}, [])
+        self.assertIn('Goal of test | Expected behavior | Actual result', md)
+        self.assertIn('| SUPPRESSED | FAIL: ACTIVE |', md)
+        self.assertIn('**Actual result:** FAIL', md)
+        self.assertNotIn('PASS', md)
+
     def test_annotations_escape_commands(self):
         self.assertEqual(s.annotation('a%\n::error::x\r'), 'a%25%0A::error::x%0D')
 
@@ -71,6 +82,8 @@ class CloudVexTests(unittest.TestCase):
             self.assertIn('CVE-2021-44228', markdown)
             self.assertIn('ACTIVE → SUPPRESSED', markdown)
             self.assertIn('NOT_EVALUATED', markdown)
+            self.assertEqual(markdown.count('PASS:'), 16)
+            self.assertLess(markdown.index('Goal of test'), markdown.index('| Test case | CVE |'))
             manifest = s.load(out / 'aws/manifest.json')
             self.assertFalse(manifest['live_aws_data'])
             self.assertFalse(manifest['policy_evaluated'])
@@ -78,3 +91,4 @@ class CloudVexTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

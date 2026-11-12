@@ -6,6 +6,16 @@ import json
 from pathlib import Path
 
 FIXTURES = Path(__file__).parent / 'fixtures'
+GOALS = {
+    'log4shell-scoped': 'Verify exact CVE, image digest and component scope with not_affected evidence.',
+    'log4shell-other-image': 'Prevent VEX suppression from carrying over to another image.',
+    'log4shell-other-version': 'Prevent VEX suppression from carrying over to another component version.',
+    'log4j-affected': 'Keep explicitly affected findings active.',
+    'log4j-investigating': 'Keep findings under investigation active.',
+    'log4j-no-statement': 'Keep findings without a matching VEX statement active.',
+    'missing-identity': 'Require review when image or component identity is missing.',
+    'provider-suppressed': 'Keep provider status separate from project VEX disposition.',
+}
 
 
 def load(path):
@@ -67,10 +77,12 @@ def escape(value):
 
 
 def report(results, unresolved):
+    expected = load(FIXTURES / 'expected.json')
     lines = ['# Azure Defender and AWS Inspector — offline VEX showcase', '',
              '**Synthetic fixtures, not live cloud findings.** Real collector normalization is exercised. '
              'Image/component mappings are explicit test inputs; Azure does not yet discover these identities. '
              'This demonstrates a limited VEX matcher, not Grype matching or production cloud enforcement.', '',
+             'A passing assertion means the expected disposition was observed, not that an image is approved. Cloud policy remains NOT_EVALUATED.', '',
              '## Legend', '',
              '| Column | Meaning |', '|---|---|',
              '| CVE / severity | Identifier and severity supplied by the synthetic provider fixture; not current vulnerability intelligence. |',
@@ -86,6 +98,17 @@ def report(results, unresolved):
                   f'**{len(rows)} CVE observations · {len(set(r["cve"] for r in rows))} unique CVEs · {suppressed} VEX-suppressed · {review} need identity review.**', '',
                   '| Test case | CVE | Severity | Provider status | Package / image | Before → after | VEX status / reason | Policy |',
                   '|---|---|---|---|---|---|---|---|']
+        # Place intent and observed assertion results before detailed findings.
+        detail_header = lines[-2:]
+        lines[-2:] = ['| Test case | Goal of test | Expected behavior | Actual result |',
+                      '|---|---|---|---|']
+        for row in rows:
+            wanted = expected.get(row['case'])
+            verdict = 'PASS' if wanted is not None and row['after_vex'] == wanted else 'FAIL'
+            cells = [row['case'], GOALS.get(row['case'], 'Unrecognized test case; review fixture coverage.'),
+                     wanted or 'No expectation defined', verdict + ': ' + row['after_vex']]
+            lines.append('| ' + ' | '.join(escape(x) for x in cells) + ' |')
+        lines += ['', *detail_header]
         for row in rows:
             cells = [row['case'], row['cve'], row['severity'], row['provider_status'],
                      (row.get('package_purl') or 'unknown') + ' / ' + (row.get('image_digest') or 'unknown'),
@@ -93,6 +116,9 @@ def report(results, unresolved):
             lines.append('| ' + ' | '.join(escape(x) for x in cells) + ' |')
         lines += ['']
     lines += ['## Unresolved Azure evidence', '',
+              '**Goal of test:** Keep assessments without recognized CVE details visible.', '',
+              '**Expected behavior:** Retain exactly one unresolved Azure assessment; do not treat it as a clean scan.', '',
+              '**Actual result:** ' + ('PASS' if len(unresolved) == 1 else 'FAIL') + f' — {len(unresolved)} unresolved assessment(s).', '',
               f'{len(unresolved)} assessment(s) could not be normalized; retained in azure/unresolved.json. This is not a clean scan.', '']
     return '\n'.join(lines)
 
@@ -142,3 +168,4 @@ if __name__ == '__main__':
     parser.add_argument('--annotations', action='store_true')
     args = parser.parse_args()
     run(args.shared, args.output, args.annotations)
+
