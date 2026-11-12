@@ -16,7 +16,16 @@ CASES = [
 ]
 
 def report(root):
-    lines = ["# CI vulnerability policy showcase", ""] + ["## 1. Legend — read this before the scan results","","**Scan overview columns**","","| Column | Meaning |","|---|---|","| Example | Image and simulated deployment scenario. |","| Exposure | Public or internal declaration, not a measured network exposure. |","| Findings | Active Grype matches after applicability filtering. |","| C / H / M / L | Grype Critical / High / Medium / Low counts; severity alone does **not** decide admission. |","| FSU | Findings to fix on the next scheduled major upgrade/rebuild **and deployment**. |","| 60D / 14D / 3D | Findings assigned final 60-day / 14-day / 3-day remediation outcomes. |","| 3DF | Findings assigned 3-day remediation **plus forensic triage**; not proof of compromise. |","| Incomplete | Findings missing trustworthy decision inputs; require review. |","| VEX ignored | Findings moved into Grype `ignoredMatches` by a matching OpenVEX statement, retained for evidence. |","| Admission | `ALLOW`: no 3D/3DF and no incomplete findings; `BLOCK`: at least one 3D/3DF; `REVIEW_REQUIRED`: incomplete without BLOCK. In this showcase all decisions run in shadow mode. |","","**Individual scan columns**","","| Column | Meaning |","|---|---|","| CVE/advisory | Vulnerability ID reported or mapped by Grype. |","| Package | Detected vulnerable software component. |","| Severity | Grype's severity rating, separate from our policy deadline. |","| KEV | CISA Known Exploited Vulnerabilities `Y` / `N` / `UNKNOWN`; Grype-absence `N` is provisional. |","| PE | Publicly Exposed `Y` or `N`; unknown is conservatively treated as `Y`. |","| A | SSVC Automatable `Y` or `N`, from CISA Vulnrichment or our documented default. |","| TI | SSVC Technical Impact `P` = partial, `T` = total. |","| SSVC lookup | `FOUND`: official CISA SSVC; `NO_SSVC`/`NO_RECORD`: fallback; `FETCH_ERROR`/`INVALID_SSVC`: review. |","| EPSS | Percentile quartile: Q1 below 25th, Q2 25–below 50th, Q3 50–below 75th, Q4 75–100th; missing = neutral Q2. |","| Base / Final | CISA BOD 26-04 base result / result after our EPSS quartile amplifier and guards. |","| Decision rule | Why the final outcome was computed or preserved. |","","**Decision-rule legend**","","| Rule | Meaning |","|---|---|","| `AMPLIFIED` | Applied the EPSS quartile mapping; it may leave the outcome unchanged. |","| `KEV_GUARD` | Known exploited (KEV=Y); keep original BOD outcome. |","| `URGENT_BASE_GUARD` | BOD already returned 3D or 3DF; cannot downgrade. |","| `EPSS_UNAVAILABLE_NEUTRAL` | EPSS absent; use neutral Q2 and record uncertainty. |","| `KEV_UNKNOWN` | Unresolved KEV mapping; review required. |","| `VULNRICHMENT_LOOKUP_FAILED` | CISA SSVC lookup failed or was invalid; review required. |","","**Data source vs rule:** Grype discovers findings, CISA may supply SSVC inputs, and the decision rule explains our policy. OpenVEX changes *applicability* only when an exact statement matches.",""] + ["## 2. Scan overview","","**Shadow mode only. No images are pushed, executed, or deployed.**","","| Example | Exposure | Findings | C / H / M / L | FSU | 60D | 14D | 3D | 3DF | Incomplete | VEX ignored | Admission |","|---|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---|"]
+    lines = [
+        "# CI vulnerability policy showcase",
+        "",
+        "## 1. Scan overview",
+        "",
+        "**Shadow mode only. No images are pushed, executed, or deployed.**",
+        "",
+        "| Example | Exposure | Findings | C / H / M / L | FSU | 60D | 14D | 3D | 3DF | Incomplete | VEX ignored | Admission |",
+        "|---|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---|",
+    ]
     ready = 0
     scan_sections = []
     for case, exposure in CASES:
@@ -69,11 +78,11 @@ def report(root):
             scan_sections.append("_Five highest-priority findings shown; see the individual report.md for all "
                                  + str(len(findings)) + " findings._")
         scan_sections.append("")
-    lines += ["", "## 3. Individual scan sections", ""] + scan_sections
+    lines += ["", "## 2. Individual scan sections", ""] + scan_sections
 
     proof_candidates = sorted((root / "showcase-vex-proof").rglob("proof.json"))
     proof_file = proof_candidates[0] if proof_candidates else (root / "showcase-vex-proof" / "proof.json")
-    lines += ["", "## 4. OpenVEX: before vs. after", ""]
+    lines += ["", "## 3. OpenVEX: before vs. after", ""]
     if proof_file.is_file():
         try:
             proof = json.loads(proof_file.read_text(encoding="utf-8"))
@@ -95,7 +104,7 @@ def report(root):
 
     lines += [
         "",
-        "## 5. Run summary",
+        "## 4. Run summary",
         "",
         f"Reports generated: **{ready}/{len(CASES)}**.",
         "",

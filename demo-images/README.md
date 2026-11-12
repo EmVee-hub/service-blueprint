@@ -27,6 +27,17 @@ outcomes are **dynamic**. The mixed example cannot guarantee a Medium vulnerabil
 and even a Critical CVE does not guarantee a BLOCK when all contextual inputs
 and the BOD/EPSS mapping are considered.
 
+## Report layout: one legend per workflow run
+
+Each workflow run publishes `security/report-legend.md` **once** in a dedicated
+`legend` job. Scan jobs depend on that job via `needs: [legend]`, so the legend
+is published before any scan starts. The shared Grype action produces **scan
+results only**, without repeating the legend in each image section or artifact.
+
+The combined comparison contains only scan overview, per-image findings, VEX
+proof, and run summary. The regular application CI workflow uses the same
+one-time legend job before its scan.
+
 ## How the workflow works
 
 Each example builds a local image, scans it with Grype, applies the **existing**

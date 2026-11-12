@@ -12,7 +12,20 @@ permissions:
   contents: read
 
 jobs:
+  legend:
+    name: Legend — How to read this report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout report legend
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Publish legend once to GitHub Actions summary
+        shell: bash
+        run: cat security/report-legend.md >> "$GITHUB_STEP_SUMMARY"
+
   scan:
+    needs: [legend]
     name: "Scan: ${{ matrix.case }}"
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -43,7 +56,7 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@0d787b9f20bc46017ac601114601e86d8c1ec4bf
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: vex/openvex.json
@@ -65,7 +78,7 @@ jobs:
 
       - name: Evaluate the SAME image with scoped demonstration VEX
         if: matrix.case == 'log4shell-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@0d787b9f20bc46017ac601114601e86d8c1ec4bf
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: demo-images/generated-vex.json

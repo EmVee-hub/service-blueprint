@@ -1,4 +1,4 @@
-"""Combined report must explain its tables before listing scan results."""
+"""Combined report must not repeat the workflow-level legend."""
 import importlib.util
 import json
 import tempfile
@@ -10,7 +10,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class SummaryTests(unittest.TestCase):
-    def test_legend_precedes_scan_overview_and_sections(self):
+    def test_scan_sections_without_embedded_legend(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "showcase-minimal-scratch-internal"
             folder.mkdir()
@@ -19,13 +19,28 @@ class SummaryTests(unittest.TestCase):
                 "counts": {}, "admission": "ALLOW", "findings": [], "vex_ignored_count": 0
             }))
             md = module.report(Path(tmp))
-            self.assertLess(md.index("## 1. Legend"), md.index("## 2. Scan overview"))
-            self.assertLess(md.index("## 2. Scan overview"), md.index("## 3. Individual scan sections"))
-            self.assertLess(md.index("## 3. Individual scan sections"), md.index("## 4. OpenVEX"))
+            self.assertNotIn("## 1. Legend", md)
+            self.assertNotIn("Decision-rule legend", md)
+            self.assertLess(md.index("## 1. Scan overview"), md.index("## 2. Individual scan sections"))
+            self.assertLess(md.index("## 2. Individual scan sections"), md.index("## 3. OpenVEX"))
             self.assertIn("### `minimal-scratch-internal`", md)
-            for label in ("KEV_GUARD", "EPSS_UNAVAILABLE_NEUTRAL", "VEX ignored", "Base / Final"):
-                self.assertIn(label, md)
+            self.assertIn("VEX ignored", md)
+            self.assertIn("Decision rule", md)
             self.assertIn("NO_REPORT", md)
+
+    def test_shared_legend_is_a_single_prerequisite_job(self):
+        repo = Path(__file__).resolve().parents[1]
+        legend = (repo / "security" / "report-legend.md").read_text(encoding="utf-8")
+        self.assertEqual(legend.count("# Legend — How to read vulnerability scan reports"), 1)
+        for key in ("KEV_GUARD", "AMPLIFIED", "EPSS_UNAVAILABLE_NEUTRAL", "VEX ignored"):
+            self.assertIn(key, legend)
+        for workflow in (
+            repo / ".github" / "workflows" / "demo-policy-showcase.yml",
+            repo / ".github" / "workflows" / "ci.yml",
+        ):
+            source = workflow.read_text(encoding="utf-8")
+            self.assertEqual(source.count("cat security/report-legend.md"), 1)
+            self.assertIn("needs: [legend]", source)
 
 if __name__ == "__main__":
     unittest.main()

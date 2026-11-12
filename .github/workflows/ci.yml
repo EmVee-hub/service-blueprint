@@ -9,7 +9,20 @@ permissions:
   contents: read
 
 jobs:
+  legend:
+    name: Legend — How to read this report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout report legend
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Publish legend once to GitHub Actions summary
+        shell: bash
+        run: cat security/report-legend.md >> "$GITHUB_STEP_SUMMARY"
+
   build-scan:
+    needs: [legend]
     # Start on hosted runners, especially for untrusted pull requests.
     # Use self-hosted only when runners are appropriately isolated.
     runs-on: ubuntu-latest
@@ -28,7 +41,7 @@ jobs:
       # Pinned central action commit from the Vulnrichment integration PR.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@0d787b9f20bc46017ac601114601e86d8c1ec4bf
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json
