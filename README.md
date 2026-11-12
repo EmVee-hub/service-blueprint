@@ -6,8 +6,9 @@ sample Dockerfile and add the application's real source code and tests.
 ## Connect to the central action
 
 1. Create `github-actions` and push the corresponding starter repository there.
-2. Update `.github/workflows/ci.yml`: replace `YOUR_ORG` and
-   `REPLACE_WITH_FULL_COMMIT_SHA` with the organisation and an actual full commit SHA.
+2. `.github/workflows/ci.yml` is pinned to `EmVee-hub/github-actions` commit
+   `893b850d923a8aee93715245dddd07cfc3eda1c3` (Vulnrichment PR branch).
+   Keep that commit reachable; update the SHA deliberately after reviewing changes.
 3. Permit access to the shared action from this repository if the central repo is private.
 4. Choose `exposure`: `public`, `internal` or `unknown`. Missing/unknown is treated as public.
 5. Keep the VEX file in this repo. Its initial `statements: []` is intentional;
@@ -25,3 +26,15 @@ sample Dockerfile and add the application's real source code and tests.
 - Full OpenVEX signature or schema validation.
 
 The CI action must run **after image build and before any production promotion**.
+
+## CISA Vulnrichment lookup
+
+The central CI action fetches CISA-ADP SSVC `Automatable` and `Technical Impact`
+for CVEs detected by Grype, then applies the BOD 26-04 + EPSS policy.
+The job needs outbound HTTPS access to `cveawg.mitre.org`.
+An absent CISA assessment uses our documented defaults; an API failure
+produces `REVIEW_REQUIRED` rather than a misleading clean decision.
+
+The workflow intentionally stays in `shadow` mode until the actual GitHub
+runner and CVE Services lookup have been smoke-tested. Security reports are
+uploaded as Actions artifacts; the sample Dockerfile is not production code.

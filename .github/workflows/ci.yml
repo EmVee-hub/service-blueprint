@@ -15,21 +15,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout application
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Build local image
         run: docker build --tag service-blueprint:ci-${{ github.sha }} .
 
-      # Download-grype is an official Anchore sub-action. Replace the version
-      # reference with an audited immutable SHA in production.
+      # Anchore's download action is pinned to an immutable reviewed commit.
       - name: Install Grype
-        uses: anchore/scan-action/download-grype@v3
+        uses: anchore/scan-action/download-grype@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2
         id: install-grype
 
-      # Replace YOUR_ORG and the placeholder with a real full 40-character SHA.
+      # Pinned central action commit from the Vulnrichment integration PR.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: YOUR_ORG/github-actions/actions/grype-policy-scan@REPLACE_WITH_FULL_COMMIT_SHA
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json
@@ -39,7 +38,7 @@ jobs:
 
       - name: Archive security assessment
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: vulnerability-assessment
           path: security-reports/
