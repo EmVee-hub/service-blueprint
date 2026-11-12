@@ -38,3 +38,11 @@ produces `REVIEW_REQUIRED` rather than a misleading clean decision.
 The workflow intentionally stays in `shadow` mode until the actual GitHub
 runner and CVE Services lookup have been smoke-tested. Security reports are
 uploaded as Actions artifacts; the sample Dockerfile is not production code.
+
+## Azure Defender / AWS Inspector test showcase
+
+[Cloud findings and VEX showcase](demo-cloud/README.md) runs both shared cloud
+collectors on synthetic fixtures and displays found CVEs, severity, provider
+status, and VEX before/after evidence in Actions annotations and a combined
+summary. It proves exact-match suppression and mismatch safeguards offline;
+production cloud policy enforcement remains pending.

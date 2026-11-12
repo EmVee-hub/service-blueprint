@@ -1,0 +1,10 @@
+{
+  "log4shell-scoped": "SUPPRESSED",
+  "log4shell-other-image": "ACTIVE",
+  "log4shell-other-version": "ACTIVE",
+  "log4j-affected": "ACTIVE",
+  "log4j-investigating": "ACTIVE",
+  "log4j-no-statement": "ACTIVE",
+  "missing-identity": "REVIEW_REQUIRED",
+  "provider-suppressed": "ACTIVE"
+}
