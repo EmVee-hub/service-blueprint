@@ -1,0 +1,11 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example.security-showcase</groupId>
+  <artifactId>library-mix-inventory</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency><groupId>org.apache.commons</groupId><artifactId>commons-compress</artifactId><version>1.21</version></dependency>
+    <dependency><groupId>org.yaml</groupId><artifactId>snakeyaml</artifactId><version>1.29</version></dependency>
+    <dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId><version>3.12.0</version></dependency>
+  </dependencies>
+</project>
