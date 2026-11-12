@@ -1,0 +1,260 @@
+{
+  "findings": [
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4shell-scoped",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "CRITICAL",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44228",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4shell-scoped",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4shell-other-image",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "CRITICAL",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44228",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4shell-other-image",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4shell-other-version",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "CRITICAL",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44228",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.0",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4shell-other-version",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4j-affected",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "CRITICAL",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-45046",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4j-affected",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4j-investigating",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "HIGH",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-45105",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4j-investigating",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/log4j-no-statement",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "MEDIUM",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44832",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-log4j-no-statement",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/missing-identity",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "ACTIVE",
+      "severity": "CRITICAL",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44228",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-missing-identity",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": null,
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "findingArn": "arn:aws:inspector2:eu-north-1:000000000000:finding/provider-suppressed",
+      "awsAccountId": "000000000000",
+      "type": "PACKAGE_VULNERABILITY",
+      "status": "SUPPRESSED",
+      "severity": "MEDIUM",
+      "packageVulnerabilityDetails": {
+        "vulnerabilityId": "CVE-2021-44832",
+        "vulnerablePackages": [
+          {
+            "name": "log4j-core",
+            "version": "2.14.1",
+            "packageManager": "JAVA",
+            "fixedInVersion": "2.17.1"
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "AWS_ECR_CONTAINER_IMAGE",
+          "id": "synthetic-provider-suppressed",
+          "region": "eu-north-1",
+          "details": {
+            "awsEcrContainerImage": {
+              "imageHash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "architecture": "amd64",
+              "inUseCount": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

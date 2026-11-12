@@ -1,0 +1,60 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.invalid/vex/cloud-showcase",
+  "author": "Synthetic cloud showcase only",
+  "timestamp": "2026-11-12T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2021-44228"
+      },
+      "products": [
+        {
+          "@id": "urn:demo:container:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "SYNTHETIC TEST ONLY: inert fixture has no executing application. Not evidence about a real workload."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2021-45046"
+      },
+      "products": [
+        {
+          "@id": "urn:demo:container:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+            }
+          ]
+        }
+      ],
+      "status": "affected",
+      "action_statement": "Demo: retain finding for remediation."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2021-45105"
+      },
+      "products": [
+        {
+          "@id": "urn:demo:container:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "subcomponents": [
+            {
+              "@id": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1"
+            }
+          ]
+        }
+      ],
+      "status": "under_investigation"
+    }
+  ]
+}
