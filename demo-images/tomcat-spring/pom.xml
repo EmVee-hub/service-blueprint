@@ -1,0 +1,10 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example.security-showcase</groupId>
+  <artifactId>tomcat-spring-inventory</artifactId>
+  <version>1.0.0</version>
+  <dependencies>
+    <dependency><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-core</artifactId><version>9.0.55</version></dependency>
+    <dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId><version>5.3.13</version></dependency>
+  </dependencies>
+</project>
