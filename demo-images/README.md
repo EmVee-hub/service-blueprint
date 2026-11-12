@@ -48,7 +48,7 @@ An automated assertion checks the actual JSON results for both cases:
 - Both report the **same image reference** and all individual findings use the expected PE and source.
 - Even if a modern Nginx image has **zero CVEs**, the exposure result is still visible at report level.
 
-The combined report includes the comparison and uploads `exposure-proof.json`.
+The scan job uploads `exposure-proof.json` with the omitted-exposure assessment.
 Setting `exposure: public` is a **policy declaration**, not proof the image
 is deployed, reachable from the internet, or automatically exposed by Nginx.
 No image is pushed or deployed by this demo.
@@ -60,9 +60,9 @@ Each workflow run publishes `security/report-legend.md` **once** in a dedicated
 is published before any scan starts. The shared Grype action produces **scan
 results only**, without repeating the legend in each image section or artifact.
 
-The combined comparison contains only scan overview, per-image findings, VEX
-proof, and run summary. The regular application CI workflow uses the same
-one-time legend job before its scan.
+Individual scan jobs publish their findings and upload their assessment artifacts.
+There is no combined comparison job or `showcase-comparison` artifact. The regular
+application CI workflow uses the same one-time legend job before its scan.
 
 ## How the workflow works
 
@@ -71,9 +71,8 @@ project VEX document at `vex/openvex.json` (currently empty: no suppression),
 fetches CISA Vulnrichment for CVEs, evaluates BOD 26-04 + the EPSS quartile
 amplifier, and uploads a JSON/Markdown report.
 
-The comparison job downloads those reports and creates a matrix including
-Grype severity counts, each final outcome count and admission (ALLOW / BLOCK /
-REVIEW_REQUIRED). The workflow also writes this summary to the job summary.
+Read each scan job's summary and individual assessment artifacts for its findings
+and policy admission (ALLOW / BLOCK / REVIEW_REQUIRED).
 
 Actual packages are never used by a running Java/React server. Setting
 `exposure: public` is a simulated input for **demonstrating** prioritisation,
@@ -127,10 +126,10 @@ fixed-output test suite.
 
 ## Reading test goals and results
 
-The combined GitHub Actions summary shows **Goal of test**, **Expected behavior**,
-and **Actual result** before each scenario's detailed findings. Live image scans
-report observed admission and counts without claiming a fixed expected verdict.
-VEX/exposure proofs and cloud fixture assertions show verified results; missing
-proof evidence remains unverified. Test success is separate from image admission:
-a test can succeed by correctly producing `BLOCK` or `REVIEW_REQUIRED`.
+Use the demo matrix above for each scenario's goal and each scan job's summary
+and artifacts for actual results. Live image scans report observed admission and
+counts without claiming a fixed expected verdict. VEX and exposure proof steps
+assert their expected behavior within the scan jobs and upload proof evidence.
+Test success is separate from image admission: a test can succeed by correctly
+producing `BLOCK` or `REVIEW_REQUIRED`.
 
