@@ -47,6 +47,27 @@ def report(root):
             str(decision.get("admission", "UNKNOWN")),
         ]
         lines.append("| " + " | ".join(fields) + " |")
+    proof_file = root / "showcase-vex-proof" / "proof.json"
+    lines += ["", "## OpenVEX: before vs. after", ""]
+    if proof_file.is_file():
+        try:
+            proof = json.loads(proof_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            proof = {}
+        if proof.get("verified") is True:
+            lines += [
+                f"- Scoped example: `{proof['vulnerability_id']}` in `{proof['package']}`.",
+                f"- Active findings before VEX: **{proof['active_before']}**.",
+                f"- Active findings after VEX: **{proof['active_after']}**.",
+                f"- VEX-suppressed matching finding(s): **{proof['suppressed_count']}**.",
+                f"- Remaining active findings are still evaluated; VEX did not waive other CVEs.",
+                "",
+            ]
+        else:
+            lines.append("VEX proof report exists, but verification failed. Review job logs.")
+    else:
+        lines.append("No verified VEX evidence was uploaded. The VEX demonstration is incomplete.")
+
     lines += [
         "",
         f"Reports generated: **{ready}/{len(CASES)}**.",
