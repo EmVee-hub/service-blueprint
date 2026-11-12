@@ -37,16 +37,6 @@ def report(root):
             grype = json.loads((folder / "grype.json").read_text())
         except (OSError, ValueError):
             lines.append(f"| {case} | {exposure} | — | — | — | — | — | — | — | — | — | NO_REPORT |")
-            input_label = "omitted" if case == "cae-live-no-exposure" else decision.get("exposure_input", exposure)
-        pe_label = decision.get("publicly_exposed", "?")
-        source_label = decision.get("exposure_source", "UNKNOWN")
-        if case == "cae-live-no-exposure":
-            display_exposure = "omitted -> PE=" + str(pe_label)
-        else:
-            display_exposure = str(input_label) + " -> PE=" + str(pe_label)
-        fields[1] = display_exposure
-        # Update the overview row with the effective exposure; do not infer it from image metadata.
-        lines[-1] = "| " + " | ".join(fields) + " |"
         scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
             continue
         ready += 1
@@ -63,6 +53,13 @@ def report(root):
             str(decision.get("admission", "UNKNOWN")),
         ]
         lines.append("| " + " | ".join(fields) + " |")
+        input_label = "omitted" if case == "cae-live-no-exposure" else decision.get("exposure_input", exposure)
+        pe_label = decision.get("publicly_exposed", "?")
+        source_label = decision.get("exposure_source", "UNKNOWN")
+        display_exposure = str(input_label) + " -> PE=" + str(pe_label)
+        fields[1] = display_exposure
+        # Show declared/default exposure clearly in the overview.
+        lines[-1] = "| " + " | ".join(fields) + " |"
         scan_sections += ["### `" + case + "`", "",
                           "- Exposure: `" + str(input_label) + "` → PE=`" + str(pe_label) + "`",
                           "- Exposure source: `" + str(source_label) + "`",

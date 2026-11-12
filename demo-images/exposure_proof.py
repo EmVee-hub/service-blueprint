@@ -76,7 +76,7 @@ def main() -> None:
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    print("CA E-LIVE EXPOSURE DEFAULT VERIFIED: public / declared -> Y; omitted / default -> Y")
+    print("CAE-LIVE EXPOSURE DEFAULT VERIFIED: public / declared -> Y; omitted / default -> Y")
 
 
 if __name__ == "__main__":
