@@ -1,7 +1,7 @@
 # Vulnerability policy showcase
 
 **Warning: intentionally old dependencies. Demonstration images must never be published or deployed.**
-All sample images contain only package inventories and start no vulnerable applications.
+Most vulnerable-package examples are inert inventories; `cae-live` is a plain Nginx image that **would** start Nginx if deployed, but our CI only builds and scans it. No containers are run by the workflow.
 The workflow builds them locally on GitHub-hosted runners, never runs a container
 or exposes a network port, never logs into a registry, and never pushes anything.
 
@@ -21,11 +21,33 @@ After the workflow is merged into the default branch, you can also use
 | Mixed Java internal | commons-compress 1.21, snakeyaml 1.29, commons-lang3 3.12.0 | internal | Known Medium example CVE-2024-26308 plus mixed other severities |
 | Legacy Alpine internal | Alpine 3.18 | internal | OS package findings |
 | Minimal scratch internal | scratch + one text file | internal | Clean/very-low baseline |
+| `cae-live` public | Plain `nginx:stable-alpine` image | **public** | Explicit PE=Y project declaration |
+| `cae-live` no exposure | **Same** Nginx image, same job | **omitted (not even `unknown`)** | Action defaults to `unknown`, effective PE=Y with `UNKNOWN_DEFAULT_PUBLIC` |
 
 The exact number and severity of Grype findings, KEV status, EPSS bins and decision
 outcomes are **dynamic**. The mixed example cannot guarantee a Medium vulnerability,
 and even a Critical CVE does not guarantee a BLOCK when all contextual inputs
 and the BOD/EPSS mapping are considered.
+
+## `cae-live`: public vs missing exposure
+
+The showcase builds a plain `nginx:stable-alpine` image locally tagged `cae-live:ci-<commit>`.
+The `cae-live-public` scan explicitly passes `exposure: public` to the shared action.
+Immediately afterwards, a second scan of **the same built image** intentionally
+omits the `exposure` input entirely. The composite-action default becomes `unknown`,
+which the evaluator conservatively maps to publicly exposed (`PE=Y`).
+
+An automated assertion checks the actual JSON results for both cases:
+
+- Explicit input: `exposure_input=public`, `publicly_exposed=Y`, `exposure_source=PROJECT_DECLARATION`.
+- Omitted input: `exposure_input=unknown`, `publicly_exposed=Y`, `exposure_source=UNKNOWN_DEFAULT_PUBLIC`.
+- Both report the **same image reference** and all individual findings use the expected PE and source.
+- Even if a modern Nginx image has **zero CVEs**, the exposure result is still visible at report level.
+
+The combined report includes the comparison and uploads `exposure-proof.json`.
+Setting `exposure: public` is a **policy declaration**, not proof the image
+is deployed, reachable from the internet, or automatically exposed by Nginx.
+No image is pushed or deployed by this demo.
 
 ## Report layout: one legend per workflow run
 
@@ -81,12 +103,10 @@ vulnerability disposition. Never copy this `not_affected` assertion to a
 running application, where Log4Shell may actually be exploitable. Real VEX
 requires project-specific evidence, identity matching, review and approval.
 
-## Decision rule legend
+## Decision-rule definitions
 
-Every per-image `report.md` now explains `AMPLIFIED`, `KEV_GUARD`,
-`URGENT_BASE_GUARD`, `EPSS_UNAVAILABLE_NEUTRAL`,
-`KEV_UNKNOWN` and `VULNRICHMENT_LOOKUP_FAILED`. It also lists
-the original Grype findings suppressed by accepted VEX statements.
+The legend appears only in the prerequisite `legend` job; per-image reports contain scan results and VEX evidence without repeating it.
+
 
 The BOD + EPSS unit tests in `github-actions` remain the authoritative,
 deterministic regression tests. This demo is a live-data showcase, not a

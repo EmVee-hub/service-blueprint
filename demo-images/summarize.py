@@ -13,6 +13,8 @@ CASES = [
     ("library-mix-internal", "internal"),
     ("legacy-alpine-internal", "internal"),
     ("minimal-scratch-internal", "internal"),
+    ("cae-live-public", "public"),
+    ("cae-live-no-exposure", "omitted"),
 ]
 
 def report(root):
@@ -35,7 +37,17 @@ def report(root):
             grype = json.loads((folder / "grype.json").read_text())
         except (OSError, ValueError):
             lines.append(f"| {case} | {exposure} | — | — | — | — | — | — | — | — | — | NO_REPORT |")
-            scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
+            input_label = "omitted" if case == "cae-live-no-exposure" else decision.get("exposure_input", exposure)
+        pe_label = decision.get("publicly_exposed", "?")
+        source_label = decision.get("exposure_source", "UNKNOWN")
+        if case == "cae-live-no-exposure":
+            display_exposure = "omitted -> PE=" + str(pe_label)
+        else:
+            display_exposure = str(input_label) + " -> PE=" + str(pe_label)
+        fields[1] = display_exposure
+        # Update the overview row with the effective exposure; do not infer it from image metadata.
+        lines[-1] = "| " + " | ".join(fields) + " |"
+        scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
             continue
         ready += 1
         severity = Counter(
@@ -52,7 +64,8 @@ def report(root):
         ]
         lines.append("| " + " | ".join(fields) + " |")
         scan_sections += ["### `" + case + "`", "",
-                          "- Exposure: `" + exposure + "`",
+                          "- Exposure: `" + str(input_label) + "` → PE=`" + str(pe_label) + "`",
+                          "- Exposure source: `" + str(source_label) + "`",
                           "- Admission: **" + str(decision.get("admission", "UNKNOWN")) + "**",
                           "- Active findings: " + str(len(grype.get("matches") or [])),
                           "- VEX ignored: " + str(decision.get("vex_ignored_count", 0)),
@@ -102,9 +115,33 @@ def report(root):
     else:
         lines.append("No verified VEX evidence was uploaded. The VEX demonstration is incomplete.")
 
+    lines += ["", "## 4. cae-live: explicitly public vs omitted exposure", ""]
+    exposure_files = sorted((root / "showcase-cae-live-no-exposure").rglob("exposure-proof.json"))
+    if exposure_files:
+        try:
+            exposure_proof = json.loads(exposure_files[0].read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            exposure_proof = {}
+        if exposure_proof.get("verified") is True:
+            lines += [
+                "- Same locally built image: `" + str(exposure_proof["image"]) + "`",
+                "- Explicitly public: input=`public`, PE=`Y`, source=`PROJECT_DECLARATION`.",
+                "- Exposure input omitted: action default=`unknown`, PE=`Y`, source=`UNKNOWN_DEFAULT_PUBLIC`.",
+                "- Active matches in both reports: **" + str(exposure_proof["findings"]) + "**.",
+                "- Matching vulnerability inventories: **verified**.",
+                "- Admission — declared: **" + str(exposure_proof["explicit"]["admission"]) +
+                  "**; omitted: **" + str(exposure_proof["omitted"]["admission"]) + "**.",
+            ]
+            if not exposure_proof.get("same_admission"):
+                lines.append("_Admission differs; review changes in live vulnerability intelligence between scans._")
+        else:
+            lines.append("Exposure proof missing valid verification data; review the cae-live scan job.")
+    else:
+        lines.append("No cae-live exposure proof artifact found.")
+
     lines += [
         "",
-        "## 4. Run summary",
+        "## 5. Run summary",
         "",
         f"Reports generated: **{ready}/{len(CASES)}**.",
         "",

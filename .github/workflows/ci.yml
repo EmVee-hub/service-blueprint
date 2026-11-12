@@ -41,7 +41,7 @@ jobs:
       # Pinned central action commit from the Vulnrichment integration PR.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@0d787b9f20bc46017ac601114601e86d8c1ec4bf
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@d9755233a90b93aec872719323db289d2651af77
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json

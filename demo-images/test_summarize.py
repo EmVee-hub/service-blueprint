@@ -23,6 +23,7 @@ class SummaryTests(unittest.TestCase):
             self.assertNotIn("Decision-rule legend", md)
             self.assertLess(md.index("## 1. Scan overview"), md.index("## 2. Individual scan sections"))
             self.assertLess(md.index("## 2. Individual scan sections"), md.index("## 3. OpenVEX"))
+            self.assertLess(md.index("## 3. OpenVEX"), md.index("## 4. cae-live"))
             self.assertIn("### `minimal-scratch-internal`", md)
             self.assertIn("VEX ignored", md)
             self.assertIn("Decision rule", md)
