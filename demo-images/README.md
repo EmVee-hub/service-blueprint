@@ -5,8 +5,9 @@ All sample images contain only package inventories and start no vulnerable appli
 The workflow builds them locally on GitHub-hosted runners, never runs a container
 or exposes a network port, never logs into a registry, and never pushes anything.
 
-Run: **Actions → Vulnerability policy showcase → Run workflow** on the showcase branch.
-A pull request touching this directory also runs the demo. The action always uses
+While the PR is open, the showcase runs automatically via the **pull_request** event.
+After the workflow is merged into the default branch, you can also use
+**Actions → Vulnerability policy showcase → Run workflow** manually. The action always uses
 **shadow** mode, so a computed BLOCK is reported but does not stop the showcase.
 
 ## Demo matrix
@@ -17,7 +18,7 @@ A pull request touching this directory also runs the demo. The action always use
 | Log4Shell internal | same exact Log4j package inventory | internal | Compare the same CVE under a different asset exposure |
 | React2Shell public | react-server-dom-webpack 19.0.0 | public | Critical RCE CVE-2025-55182 (sometimes called Node2Shell in our discussions) |
 | Tomcat + Spring public | tomcat-embed-core 9.0.55, spring-webmvc 5.3.13 | public | Several Java advisories |
-| Mixed Java internal | commons-compress 1.21, snakeyaml 1.29, commons-lang3 3.12.0 | internal | Mixed vulnerabilities, potentially including Medium |
+| Mixed Java internal | commons-compress 1.21, snakeyaml 1.29, commons-lang3 3.12.0 | internal | Known Medium example CVE-2024-26308 plus mixed other severities |
 | Legacy Alpine internal | Alpine 3.18 | internal | OS package findings |
 | Minimal scratch internal | scratch + one text file | internal | Clean/very-low baseline |
 
