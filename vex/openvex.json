@@ -1,0 +1,7 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://example.invalid/vex/service-blueprint/demo",
+  "author": "Example template - replace with your project identity",
+  "version": 1,
+  "statements": []
+}
