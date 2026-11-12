@@ -1,4 +1,4 @@
-name: Application CI and vulnerability policy
+name: Application container security PoC CI
 on:
   pull_request:
   push:

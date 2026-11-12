@@ -1,4 +1,4 @@
-name: Vulnerability policy showcase
+name: Container vulnerability PoC showcase
 # The images contain known-vulnerable packages but start no services.
 # Run the full image matrix on demand. Offline regression tests run in ci.yml.
 on:

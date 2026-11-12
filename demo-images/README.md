@@ -1,4 +1,4 @@
-# Vulnerability policy showcase
+# Container vulnerability policy PoC showcase
 
 **Warning: intentionally old dependencies. Demonstration images must never be published or deployed.**
 Most vulnerable-package examples are inert inventories; `cae-live` is a plain Nginx image that **would** start Nginx if deployed, but our CI only builds and scans it. No containers are run by the workflow.
