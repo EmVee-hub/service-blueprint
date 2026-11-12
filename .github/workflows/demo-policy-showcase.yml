@@ -62,25 +62,27 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@35e9d9c133e6f1b013c57b6cf36b7ca79cf3f3b2
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@ad3af2dfa8efe404a9f682bf658deeff9991d2ee
         with:
           image: ${{ env.DEMO_IMAGE }}
           vex-path: vex/openvex.json
           exposure: ${{ matrix.exposure }}
           grype-binary: ${{ steps.grype.outputs.cmd }}
           mode: shadow
+          poc-kev-epss: 'true'
           report-directory: security-reports/${{ matrix.case }}
 
       # This is the SAME local image, re-scanned without passing `exposure` at all.
       # The composite action defaults missing exposure to unknown -> PE=Y.
       - name: Rescan cae-live WITHOUT the exposure input
         if: matrix.case == 'cae-live-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@35e9d9c133e6f1b013c57b6cf36b7ca79cf3f3b2
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@ad3af2dfa8efe404a9f682bf658deeff9991d2ee
         with:
           image: ${{ env.DEMO_IMAGE }}
           vex-path: vex/openvex.json
           grype-binary: ${{ steps.grype.outputs.cmd }}
           mode: shadow
+          poc-kev-epss: 'true'
           report-directory: security-reports/cae-live-no-exposure
 
       - name: Verify cae-live explicit vs omitted exposure
@@ -113,13 +115,14 @@ jobs:
 
       - name: Evaluate the SAME image with scoped demonstration VEX
         if: matrix.case == 'log4shell-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@35e9d9c133e6f1b013c57b6cf36b7ca79cf3f3b2
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@ad3af2dfa8efe404a9f682bf658deeff9991d2ee
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: demo-images/generated-vex.json
           exposure: public
           grype-binary: ${{ steps.grype.outputs.cmd }}
           mode: shadow
+          poc-kev-epss: 'true'
           report-directory: security-reports/vex-proof
 
       - name: Assert scoped VEX suppressions and ALLOW admission

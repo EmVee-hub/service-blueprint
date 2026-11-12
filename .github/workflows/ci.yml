@@ -45,12 +45,13 @@ jobs:
       # Pinned central action commit from the Vulnrichment integration PR.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@d9755233a90b93aec872719323db289d2651af77
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@ad3af2dfa8efe404a9f682bf658deeff9991d2ee
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json
           exposure: unknown
           mode: shadow # change to enforce only after validating real results
+          poc-kev-epss: 'true'
           grype-binary: ${{ steps.install-grype.outputs.cmd }}
 
       - name: Archive security assessment
