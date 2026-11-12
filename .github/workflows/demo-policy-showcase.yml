@@ -43,7 +43,7 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@dcb43e127956498c180fd5caa1fa1f4b67a5f2c5
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: vex/openvex.json
@@ -65,7 +65,7 @@ jobs:
 
       - name: Evaluate the SAME image with scoped demonstration VEX
         if: matrix.case == 'log4shell-public'
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@dcb43e127956498c180fd5caa1fa1f4b67a5f2c5
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: demo-images/generated-vex.json
