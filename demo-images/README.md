@@ -44,6 +44,39 @@ not evidence that a public service is running. These images intentionally
 contain vulnerable software but are not designed to demonstrate exploitability.
 They also do not establish an appropriate `not_affected` VEX justification.
 
+## OpenVEX before/after demonstration
+
+Unlike the other matrix cases (which use the project's empty `vex/openvex.json`),
+the **log4shell-public** case runs a second scan of the **same local image**
+with a generated, tightly scoped OpenVEX document:
+
+1. First scan: Grype finds Log4Shell without any suppression.
+2. `vex_proof.py create` selects **only** the exact
+   `CVE-2021-44228` / `log4j-core:2.14.1` finding, records Grype's
+   primary ID and package PURL, and creates a VEX statement with product
+   context. The documented justification is
+   `vulnerable_code_not_in_execute_path` because this **inert training image**
+   contains JARs as data but has **no Java runtime or application** that can
+   invoke the vulnerable code.
+3. Second scan: the shared action applies the generated VEX.
+4. The test **fails** unless the exact finding moves from Grype
+   `matches` into `ignoredMatches` with VEX evidence; it also verifies
+   unrelated findings remain active.
+5. Both reports, the VEX document, and `proof.json` are uploaded; the
+   combined comparison reports the active before/after counts.
+
+**Critical:** this is a controlled educational fixture, not an automated
+vulnerability disposition. Never copy this `not_affected` assertion to a
+running application, where Log4Shell may actually be exploitable. Real VEX
+requires project-specific evidence, identity matching, review and approval.
+
+## Decision rule legend
+
+Every per-image `report.md` now explains `AMPLIFIED`, `KEV_GUARD`,
+`URGENT_BASE_GUARD`, `EPSS_UNAVAILABLE_NEUTRAL`,
+`KEV_UNKNOWN` and `VULNRICHMENT_LOOKUP_FAILED`. It also lists
+the original Grype findings suppressed by accepted VEX statements.
+
 The BOD + EPSS unit tests in `github-actions` remain the authoritative,
 deterministic regression tests. This demo is a live-data showcase, not a
 fixed-output test suite.

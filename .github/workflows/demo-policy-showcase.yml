@@ -43,7 +43,7 @@ jobs:
 
       - name: Scan, apply VEX, fetch CISA Vulnrichment and evaluate
         id: policy
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@893b850d923a8aee93715245dddd07cfc3eda1c3
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
         with:
           image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
           vex-path: vex/openvex.json
@@ -51,6 +51,48 @@ jobs:
           grype-binary: ${{ steps.grype.outputs.cmd }}
           mode: shadow
           report-directory: security-reports/${{ matrix.case }}
+
+      # A real Grype/OpenVEX proof for one image. The statement is created
+      # exclusively for this inert educational image, never for a service.
+      - name: Create scoped demonstration VEX from the baseline Log4Shell match
+        if: matrix.case == 'log4shell-public'
+        shell: bash
+        run: |
+          python3 demo-images/vex_proof.py create \
+            --baseline security-reports/log4shell-public/grype.json \
+            --image "policy-showcase:${{ matrix.case }}-${{ github.sha }}" \
+            --vex demo-images/generated-vex.json
+
+      - name: Evaluate the SAME image with scoped demonstration VEX
+        if: matrix.case == 'log4shell-public'
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@c508c86e4c4584defc6eb931fd3fc46991030451
+        with:
+          image: policy-showcase:${{ matrix.case }}-${{ github.sha }}
+          vex-path: demo-images/generated-vex.json
+          exposure: public
+          grype-binary: ${{ steps.grype.outputs.cmd }}
+          mode: shadow
+          report-directory: security-reports/vex-proof
+
+      - name: Assert VEX suppressed only the intended CVE and package
+        if: matrix.case == 'log4shell-public'
+        shell: bash
+        run: |
+          python3 demo-images/vex_proof.py check \
+            --baseline security-reports/log4shell-public/grype.json \
+            --with-vex security-reports/vex-proof/grype.json \
+            --vex demo-images/generated-vex.json \
+            --proof security-reports/vex-proof/proof.json
+          cp demo-images/generated-vex.json security-reports/vex-proof/generated-vex.json
+
+      - name: Upload explicit VEX before-and-after evidence
+        if: always() && matrix.case == 'log4shell-public'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: showcase-vex-proof
+          path: security-reports/vex-proof/
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload individual assessment
         if: always()
@@ -68,17 +110,27 @@ jobs:
     if: always()
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Test VEX demonstration safeguards (offline)
+        run: python3 -m unittest discover -s demo-images -p 'test_*.py' -v
       - name: Download individual reports
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         continue-on-error: true
         with:
           pattern: showcase-*
           path: showcase-results
+      - name: Test report and VEX proof helpers
+        run: python3 -m unittest discover -s demo-images -p 'test_*.py' -v
+
       - name: Generate comparison
         shell: bash
         run: |
           python3 demo-images/summarize.py showcase-results > showcase-summary.md
           cat showcase-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify VEX proof was produced
+        shell: bash
+        run: |
+          find showcase-results/showcase-vex-proof -name proof.json -type f -print | grep -q 'proof.json'
+
       - name: Upload comparison
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
