@@ -37,7 +37,7 @@ def report(root):
             grype = json.loads((folder / "grype.json").read_text())
         except (OSError, ValueError):
             lines.append(f"| {case} | {exposure} | — | — | — | — | — | — | — | — | — | NO_REPORT |")
-        scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
+            scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
             continue
         ready += 1
         severity = Counter(
