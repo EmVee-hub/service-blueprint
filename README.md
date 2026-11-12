@@ -56,4 +56,7 @@ synthetic registry finding/VEX parsing without a runtime join. It is removed
 from this scaffold to prevent it being confused with the running-container
 pipeline. See the [central runtime pilot documentation](https://github.com/EmVee-hub/github-actions/blob/main/docs/runtime-mvp.md).
 
-The application CI Grype and OpenVEX showcase remains in this repository.
+The normal application CI (`.github/workflows/ci.yml`) builds and scans the
+candidate image and now also runs the lightweight vulnerability showcase unit
+tests. The full `.github/workflows/demo-policy-showcase.yml` image matrix is
+**manual-only**, for security walkthroughs rather than every pull request.

@@ -1,12 +1,8 @@
 name: Vulnerability policy showcase
 # The images contain known-vulnerable packages but start no services.
+# Run the full image matrix on demand. Offline regression tests run in ci.yml.
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/demo-policy-showcase.yml"
-      - "demo-images/**"
-      - "vex/openvex.json"
 
 permissions:
   contents: read
@@ -171,8 +167,6 @@ jobs:
         with:
           pattern: showcase-*
           path: showcase-results
-      - name: Test report and VEX proof helpers
-        run: python3 -m unittest discover -s demo-images -p 'test_*.py' -v
 
       - name: Generate comparison
         shell: bash

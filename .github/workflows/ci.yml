@@ -30,6 +30,10 @@ jobs:
       - name: Checkout application
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
+      # Keeps demonstration helpers tested without running the expensive image matrix.
+      - name: Test vulnerability showcase helpers (offline)
+        run: python3 -m unittest discover -s demo-images -p 'test_*.py' -v
+
       - name: Build local image
         run: docker build --tag service-blueprint:ci-${{ github.sha }} .
 

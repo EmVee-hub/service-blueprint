@@ -5,10 +5,14 @@ Most vulnerable-package examples are inert inventories; `cae-live` is a plain Ng
 The workflow builds them locally on GitHub-hosted runners, never runs a container
 or exposes a network port, never logs into a registry, and never pushes anything.
 
-While the PR is open, the showcase runs automatically via the **pull_request** event.
-After the workflow is merged into the default branch, you can also use
-**Actions → Vulnerability policy showcase → Run workflow** manually. The action always uses
-**shadow** mode, so a computed BLOCK is reported but does not stop the showcase.
+The complete vulnerability showcase runs **manually only** via
+**Actions → Vulnerability policy showcase → Run workflow**. It no longer
+runs the eight-image matrix on ordinary pull requests. The lightweight
+offline tests for the report, VEX and exposure proof helpers run in the normal
+`.github/workflows/ci.yml` on every PR/push instead.
+
+The showcase always uses **shadow** mode, so a computed BLOCK is reported
+but does not stop the demonstration.
 
 ## Demo matrix
 
