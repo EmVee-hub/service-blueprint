@@ -42,16 +42,15 @@ jobs:
         uses: anchore/scan-action/download-grype@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2
         id: install-grype
 
-      # Pinned central action commit from the Vulnrichment integration PR.
+      # Reviewed BOD 26-04 + post-BOD EPSS quartile policy action SHA.
       - name: Scan, apply VEX, evaluate security policy
         id: security
-        uses: EmVee-hub/github-actions/actions/grype-policy-scan@ad3af2dfa8efe404a9f682bf658deeff9991d2ee
+        uses: EmVee-hub/github-actions/actions/grype-policy-scan@cfbfd7767029560ecc790112965db74b78ac5464
         with:
           image: service-blueprint:ci-${{ github.sha }}
           vex-path: vex/openvex.json
           exposure: unknown
           mode: shadow # change to enforce only after validating real results
-          poc-kev-epss: 'true'
           grype-binary: ${{ steps.install-grype.outputs.cmd }}
 
       - name: Archive security assessment

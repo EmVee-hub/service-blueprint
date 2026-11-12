@@ -43,5 +43,10 @@ show the actual Grype findings and policy decisions without repeating these defi
 | REVIEW_REQUIRED | Incomplete inputs with no evaluated 3D/3DF already causing BLOCK. |
 | VEX ignored | Finding moved to Grype `ignoredMatches` due to matching OpenVEX; retained as evidence. |
 
+**Policy authority:** CISA BOD 26-04 determines the initial priority.
+The configurable EPSS quartile table applies only afterward, with KEV and
+urgent-base protections. CI admits only non-3D/non-3DF, fully evaluated
+unsuppressed findings; this is a **local gate**, not a CISA-defined CI policy.
+
 **Source vs rule:** Grype discovers findings, CISA can provide SSVC values,
 and our decision rule explains prioritisation. EPSS amplification is **local policy**, not CISA's table.

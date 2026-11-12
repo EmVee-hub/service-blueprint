@@ -114,7 +114,7 @@ requires project-specific evidence, identity matching, review and approval.
 The legend appears only in the prerequisite `legend` job; per-image reports contain scan results and VEX evidence without repeating it.
 
 
-The BOD + EPSS unit tests in `github-actions` remain the authoritative,
+The BOD 26-04 decision-table + post-BOD quartile amplifier tests in `github-actions` remain the authoritative,
 deterministic regression tests. This demo is a live-data showcase, not a
 fixed-output test suite.
 
