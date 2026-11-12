@@ -104,7 +104,8 @@ def report(root):
                 f"- Active findings before VEX: **{proof['active_before']}**.",
                 f"- Active findings after VEX: **{proof['active_after']}**.",
                 f"- VEX-suppressed matching finding(s): **{proof['suppressed_count']}**.",
-                f"- Remaining active findings are still evaluated; VEX did not waive other CVEs.",
+                f"- After-VEX admission: **{proof.get('admission', 'UNKNOWN')}**.",
+                "- Unrelated components remain active and are still evaluated.",
                 "",
             ]
         else:
@@ -149,3 +150,4 @@ def report(root):
 
 if __name__ == "__main__":
     print(report(Path(sys.argv[1]) if len(sys.argv) > 1 else Path("showcase-results")), end="")
+
