@@ -120,3 +120,13 @@ fixed-output test suite.
 - React2Shell: https://react.dev/blog/2025/12/03/critical-security-vulnerability-in-react-server-components
 - CISA BOD 26-04 table: https://github.com/CERTCC/SSVC/blob/main/data/json/decision_tables/cisa/cisa_bod_26_04_1_0_0.json
 
+
+## Reading test goals and results
+
+The combined GitHub Actions summary shows **Goal of test**, **Expected behavior**,
+and **Actual result** before each scenario's detailed findings. Live image scans
+report observed admission and counts without claiming a fixed expected verdict.
+VEX/exposure proofs and cloud fixture assertions show verified results; missing
+proof evidence remains unverified. Test success is separate from image admission:
+a test can succeed by correctly producing `BLOCK` or `REVIEW_REQUIRED`.
+

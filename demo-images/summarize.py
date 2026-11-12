@@ -17,6 +17,25 @@ CASES = [
     ("cae-live-no-exposure", "omitted"),
 ]
 
+# Live scans demonstrate capabilities; exact CVE counts and admission are dynamic.
+GOALS = {
+    "log4shell-public": ("Demonstrate KEV-aware prioritization of vulnerable Log4j with public exposure.", "Scan Log4j and report BOD/EPSS decisions with PE=Y; admission depends on current intelligence."),
+    "log4shell-internal": ("Show how internal exposure affects the same Log4j inventory.", "Evaluate with PE=N for comparison with log4shell-public; a different verdict is not guaranteed."),
+    "react2shell-public": ("Demonstrate JavaScript dependency vulnerability detection.", "Scan the React Server Components inventory and report contextual decisions with PE=Y."),
+    "tomcat-spring-public": ("Demonstrate decisions for multiple vulnerable Java dependencies.", "Report individual Tomcat/Spring findings and their BOD/EPSS outcomes."),
+    "library-mix-internal": ("Show prioritization across a mixed Java dependency inventory.", "Evaluate findings with internal exposure; severity alone does not determine admission."),
+    "legacy-alpine-internal": ("Demonstrate OS and base-image package scanning.", "Report findings detected in the Alpine inventory with internal exposure."),
+    "minimal-scratch-internal": ("Demonstrate the minimal-image baseline and empty-finding handling.", "Produce a valid report even when no vulnerable packages are detected."),
+    "cae-live-public": ("Demonstrate an explicit public-exposure declaration for Nginx.", "Record PE=Y and PROJECT_DECLARATION, even with zero findings."),
+    "cae-live-no-exposure": ("Verify the conservative default when exposure is omitted.", "Record unknown input, PE=Y and UNKNOWN_DEFAULT_PUBLIC for the same Nginx image."),
+}
+
+
+def intent(case):
+    goal, expected = GOALS[case]
+    return ["**Goal of test:** " + goal, "", "**Expected behavior:** " + expected, ""]
+
+
 def report(root):
     lines = [
         "# CI vulnerability policy showcase",
@@ -24,6 +43,7 @@ def report(root):
         "## 1. Scan overview",
         "",
         "**Shadow mode only. No images are pushed, executed, or deployed.**",
+        "A test can succeed by correctly producing BLOCK. Image admission is separate from test success. Live scans have no fixed admission expectation.",
         "",
         "| Example | Exposure | Findings | C / H / M / L | FSU | 60D | 14D | 3D | 3DF | Incomplete | VEX ignored | Admission |",
         "|---|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---|",
@@ -37,7 +57,7 @@ def report(root):
             grype = json.loads((folder / "grype.json").read_text())
         except (OSError, ValueError):
             lines.append(f"| {case} | {exposure} | — | — | — | — | — | — | — | — | — | NO_REPORT |")
-            scan_sections += ["### `" + case + "`", "", "_No scan report was uploaded._", ""]
+            scan_sections += ["### `" + case + "`", ""] + intent(case) + ["**Actual result:** NO_REPORT — missing or unreadable scan evidence; test outcome unverified.", ""]
             continue
         ready += 1
         severity = Counter(
@@ -60,7 +80,8 @@ def report(root):
         fields[1] = display_exposure
         # Show declared/default exposure clearly in the overview.
         lines[-1] = "| " + " | ".join(fields) + " |"
-        scan_sections += ["### `" + case + "`", "",
+        scan_sections += ["### `" + case + "`", ""] + intent(case) + [
+                          "**Actual result:** Scan evidence received; observed values below (not a test-pass assertion).", "",
                           "- Exposure: `" + str(input_label) + "` → PE=`" + str(pe_label) + "`",
                           "- Exposure source: `" + str(source_label) + "`",
                           "- Admission: **" + str(decision.get("admission", "UNKNOWN")) + "**",
@@ -92,7 +113,9 @@ def report(root):
 
     proof_candidates = sorted((root / "showcase-vex-proof").rglob("proof.json"))
     proof_file = proof_candidates[0] if proof_candidates else (root / "showcase-vex-proof" / "proof.json")
-    lines += ["", "## 3. OpenVEX: before vs. after", ""]
+    lines += ["", "## 3. OpenVEX: before vs. after", "",
+              "**Goal of test:** Demonstrate scoped VEX suppression on the same image.", "",
+              "**Expected behavior:** All scoped Log4j findings move to ignoredMatches with VEX evidence; unrelated components remain active and after-VEX admission is ALLOW.", ""]
     if proof_file.is_file():
         try:
             proof = json.loads(proof_file.read_text(encoding="utf-8"))
@@ -100,6 +123,7 @@ def report(root):
             proof = {}
         if proof.get("verified") is True:
             lines += [
+                "**Actual result:** PASS — verified VEX proof.", "",
                 f"- Scoped example: `{proof['vulnerability_id']}` in `{proof['package']}`.",
                 f"- Active findings before VEX: **{proof['active_before']}**.",
                 f"- Active findings after VEX: **{proof['active_after']}**.",
@@ -109,11 +133,13 @@ def report(root):
                 "",
             ]
         else:
-            lines.append("VEX proof report exists, but verification failed. Review job logs.")
+            lines.append("**Actual result:** UNVERIFIED — VEX proof does not confirm success. Review job logs.")
     else:
-        lines.append("No verified VEX evidence was uploaded. The VEX demonstration is incomplete.")
+        lines.append("**Actual result:** NO_REPORT — no verified VEX evidence was uploaded; demonstration incomplete.")
 
-    lines += ["", "## 4. cae-live: explicitly public vs omitted exposure", ""]
+    lines += ["", "## 4. cae-live: explicitly public vs omitted exposure", "",
+              "**Goal of test:** Verify explicit and omitted exposure handling on the same Nginx image.", "",
+              "**Expected behavior:** Both use PE=Y, with PROJECT_DECLARATION versus UNKNOWN_DEFAULT_PUBLIC recorded as the source.", ""]
     exposure_files = sorted((root / "showcase-cae-live-no-exposure").rglob("exposure-proof.json"))
     if exposure_files:
         try:
@@ -122,6 +148,7 @@ def report(root):
             exposure_proof = {}
         if exposure_proof.get("verified") is True:
             lines += [
+                "**Actual result:** PASS — verified exposure proof.", "",
                 "- Same locally built image: `" + str(exposure_proof["image"]) + "`",
                 "- Explicitly public: input=`public`, PE=`Y`, source=`PROJECT_DECLARATION`.",
                 "- Exposure input omitted: action default=`unknown`, PE=`Y`, source=`UNKNOWN_DEFAULT_PUBLIC`.",
@@ -133,9 +160,9 @@ def report(root):
             if not exposure_proof.get("same_admission"):
                 lines.append("_Admission differs; review changes in live vulnerability intelligence between scans._")
         else:
-            lines.append("Exposure proof missing valid verification data; review the cae-live scan job.")
+            lines.append("**Actual result:** UNVERIFIED — exposure proof does not confirm success; review the cae-live scan job.")
     else:
-        lines.append("No cae-live exposure proof artifact found.")
+        lines.append("**Actual result:** NO_REPORT — no cae-live exposure proof artifact found.")
 
     lines += [
         "",

@@ -28,6 +28,12 @@ class SummaryTests(unittest.TestCase):
             self.assertIn("VEX ignored", md)
             self.assertIn("Decision rule", md)
             self.assertIn("NO_REPORT", md)
+            self.assertEqual(md.count("**Goal of test:**"), len(module.CASES) + 2)
+            self.assertEqual(md.count("**Expected behavior:**"), len(module.CASES) + 2)
+            self.assertEqual(md.count("**Actual result:**"), len(module.CASES) + 2)
+            self.assertIn("not a test-pass assertion", md)
+            self.assertNotIn("**Actual result:** PASS", md)
+            self.assertIn("Image admission is separate from test success", md)
 
     def test_shared_legend_is_a_single_prerequisite_job(self):
         repo = Path(__file__).resolve().parents[1]
@@ -45,3 +51,4 @@ class SummaryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
